@@ -30,7 +30,7 @@ Model disimpan di `~/.cache/supertonic3` di Linux/macOS, dan `C:\Users\<nama>\.c
 Linux atau macOS:
 
 ```bash
-git clone https://github.com/<username>/bacakan.git
+git clone https://github.com/ywildan/bacakan.git
 cd bacakan
 python3 -m venv .venv
 source .venv/bin/activate
@@ -40,7 +40,7 @@ pip install -e .
 Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/<username>/bacakan.git
+git clone https://github.com/ywildan/bacakan.git
 cd bacakan
 py -3 -m venv .venv
 .venv\Scripts\Activate.ps1
