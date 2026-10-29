@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bacakan</title>
+<style>
+  :root {
+    --kertas: #f4f2ed;
+    --kartu: #fffdf9;
+    --tinta: #1c1b18;
+    --redup: #6b675e;
+    --garis: #ddd8cc;
+    --aksen: #0f5c4d;
+    --aksen-terang: #e3efe9;
+    --bahaya: #a3341f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 64px;
+    background: var(--kertas); color: var(--tinta);
+    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 26px; letter-spacing: -0.02em; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--redup); font-size: 14px; }
+  .kartu {
+    background: var(--kartu); border: 1px solid var(--garis);
+    border-radius: 14px; padding: 22px;
+    box-shadow: 0 1px 2px rgba(28, 27, 24, 0.04);
+  }
+  .kartu + .kartu { margin-top: 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .baris { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .baris > div { min-width: 0; }
+  select, input[type=text], input[type=number], textarea {
+    width: 100%; padding: 9px 11px;
+    border: 1px solid var(--garis); border-radius: 9px;
+    background: #fff; color: var(--tinta);
+    font: inherit; font-size: 15px;
+  }
+  textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
+  select:focus, input:focus, textarea:focus {
+    outline: 2px solid var(--aksen); outline-offset: 1px; border-color: var(--aksen);
+  }
+  .catatan { font-size: 12.5px; color: var(--redup); margin-top: 6px; }
+  .alat-teks { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+  .label-file {
+    display: inline-block; cursor: pointer; font-size: 13px; font-weight: 600;
+    white-space: nowrap;
+    color: var(--aksen); background: var(--aksen-terang);
+    border: 1px solid #c8ded4; border-radius: 8px; padding: 7px 12px;
+  }
+  #file-txt { display: none; }
+  button {
+    font: inherit; font-weight: 600; font-size: 15px; cursor: pointer;
+    border-radius: 9px; border: 1px solid transparent; padding: 11px 16px;
+  }
+  button:disabled { opacity: 0.55; cursor: progress; }
+  .utama { width: 100%; margin-top: 18px; background: var(--aksen); color: #fff; }
+  .utama:hover:not(:disabled) { background: #0c4a3e; }
+  .sekunder {
+    background: transparent; color: var(--aksen);
+    border-color: #b9cfc5;
+  }
+  .sekunder:hover:not(:disabled) { background: var(--aksen-terang); }
+  #galat {
+    margin-top: 16px; padding: 11px 14px; border-radius: 9px;
+    background: #fbebe6; border: 1px solid #efc8bc;
+    color: var(--bahaya); font-size: 14px;
+  }
+  #galat:empty { display: none; }
+  #hasil { display: none; }
+  #hasil.tampil { display: block; }
+  #hasil h2 { font-size: 15px; margin: 0 0 12px; }
+  audio { width: 100%; margin-bottom: 10px; }
+  .meta {
+    font-size: 13px; color: var(--redup); font-variant-numeric: tabular-nums;
+    margin-bottom: 14px; overflow-wrap: anywhere;
+  }
+  .aksi { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .tautan-unduh { font-size: 14px; font-weight: 600; color: var(--aksen); }
+  #kotak-tautan {
+    margin-top: 14px; padding: 12px 14px; border-radius: 9px;
+    background: var(--aksen-terang); border: 1px solid #c8ded4;
+    font-size: 13px; overflow-wrap: anywhere;
+  }
+  #kotak-tautan a { color: var(--aksen); font-weight: 600; }
+  #kotak-tautan button { padding: 5px 10px; font-size: 12.5px; margin-top: 8px; }
+  footer { max-width: 680px; margin: 22px auto 0; font-size: 12.5px; color: var(--redup); }
+  @media (max-width: 520px) {
+    body { padding-top: 24px; }
+    .baris { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Bacakan</h1>
+    <p>Teks Bahasa Indonesia jadi suara, jalan lokal di komputer ini. Model dimuat sekali saat server start.</p>
+  </header>
+
+  <form id="form" class="kartu">
+    <div class="baris">
+      <div>
+        <label for="suara">Suara</label>
+        <select id="suara"></select>
+      </div>
+      <div>
+        <label for="format">Format</label>
+        <select id="format">
+          <option value="wav">WAV (lossless)</option>
+          <option value="mp3" id="opsi-mp3">MP3 (kecil)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label for="nama">Nama file (opsional)</label>
+      <input id="nama" type="text" placeholder="otomatis: output-YYYYMMDD-HHMMSS">
+      <div class="catatan" id="catatan-format">Ekstensi mengikuti format yang dipilih.</div>
+    </div>
+
+    <label for="teks">Teks</label>
+    <textarea id="teks" placeholder="Tulis atau tempel teks Bahasa Indonesia di sini..."></textarea>
+    <div class="alat-teks">
+      <label class="label-file" for="file-txt">Baca dari file .txt</label>
+      <input id="file-txt" type="file" accept=".txt,text/plain">
+      <span class="catatan">Isi file akan menggantikan teks di kotak.</span>
+    </div>
+
+    <div class="baris" style="margin-top: 16px;">
+      <div>
+        <label for="speed">Speed</label>
+        <input id="speed" type="number" step="0.05" min="0.1" max="3" value="__SPEED__">
+      </div>
+      <div>
+        <label for="steps">Total steps</label>
+        <input id="steps" type="number" step="1" min="1" max="100" value="__STEPS__">
+      </div>
+    </div>
+
+    <button class="utama" id="tombol-buat" type="submit">Buat suara</button>
+    <div id="galat"></div>
+  </form>
+
+  <section id="hasil" class="kartu">
+    <h2>Hasil</h2>
+    <audio id="pemutar" controls></audio>
+    <div class="meta" id="meta"></div>
+    <div class="aksi">
+      <a class="tautan-unduh" id="unduh" href="#" download>Unduh</a>
+      <button class="sekunder" id="tombol-bagi" type="button">Bagikan ke getshared</button>
+    </div>
+    <div id="kotak-tautan" hidden>
+      <div>Link publik (berlaku 30 hari):</div>
+      <a id="tautan" href="#" target="_blank" rel="noopener"></a>
+      <div><button class="sekunder" id="tombol-salin" type="button">Salin link</button></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Hasil disimpan sebagai WAV atau MP3 di folder output server. Bagikan memakai getshared, link publik berlaku 30 hari. Bacakan __VERSION__.
+</footer>
+
+<script>
+  const SUARA = __VOICES__;
+  const MP3_TERSEDIA = __MP3__;
+  const BAGIKAN_AKTIF = __SHARE__;
+  const pilihSuara = document.getElementById('suara');
+  for (const nama of SUARA) {
+    const opsi = document.createElement('option');
+    opsi.value = nama;
+    opsi.textContent = nama + (nama.startsWith('F') ? ' (wanita)' : ' (pria)');
+    pilihSuara.append(opsi);
+  }
+  pilihSuara.value = '__DEFAULT_VOICE__';
+
+  const pilihFormat = document.getElementById('format');
+  if (!MP3_TERSEDIA) {
+    const opsiMp3 = document.getElementById('opsi-mp3');
+    opsiMp3.disabled = true;
+    opsiMp3.textContent = 'MP3 (butuh ffmpeg, tidak tersedia)';
+    document.getElementById('catatan-format').textContent =
+      'MP3 tidak tersedia karena ffmpeg tidak ditemukan di sistem.';
+  }
+
+  const kotakGalat = document.getElementById('galat');
+  const bagianHasil = document.getElementById('hasil');
+  const tombolBuat = document.getElementById('tombol-buat');
+  const tombolBagi = document.getElementById('tombol-bagi');
+  const kotakTautan = document.getElementById('kotak-tautan');
+  const tautan = document.getElementById('tautan');
+  let hasilTerakhir = null;
+
+  if (!BAGIKAN_AKTIF) {
+    tombolBagi.hidden = true;
+  }
+
+  function tampilkanGalat(pesan) {
+    kotakGalat.textContent = pesan;
+  }
+
+  function ukuranManusia(byte) {
+    if (byte >= 1048576) return (byte / 1048576).toFixed(2) + ' MB';
+    return (byte / 1024).toFixed(1) + ' KB';
+  }
+
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    tampilkanGalat('');
+    const teks = document.getElementById('teks').value.trim();
+    if (!teks) {
+      tampilkanGalat('Teks belum diisi.');
+      return;
+    }
+    tombolBuat.disabled = true;
+    tombolBuat.textContent = 'Membuat suara...';
+    try {
+      const res = await fetch('/api/sintesis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          suara: pilihSuara.value,
+          teks: teks,
+          nama: document.getElementById('nama').value,
+          speed: document.getElementById('speed').value,
+          steps: document.getElementById('steps').value,
+          format: pilihFormat.value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        tampilkanGalat(data.pesan || 'Gagal membuat suara.');
+        return;
+      }
+      tampilkanHasil(data);
+    } catch (err) {
+      tampilkanGalat('Tidak bisa menghubungi server: ' + err.message);
+    } finally {
+      tombolBuat.disabled = false;
+      tombolBuat.textContent = 'Buat suara';
+    }
+  });
+
+  function tampilkanHasil(data) {
+    hasilTerakhir = data;
+    const pemutar = document.getElementById('pemutar');
+    pemutar.src = data.url + '?v=' + Date.now();
+    const unduh = document.getElementById('unduh');
+    unduh.href = data.url;
+    unduh.setAttribute('download', data.nama);
+    unduh.textContent = 'Unduh .' + data.nama.split('.').pop();
+    document.getElementById('meta').textContent =
+      data.nama + '  ·  ' + ukuranManusia(data.ukuran) +
+      '  ·  ' + data.durasi.toFixed(2) + ' detik  ·  suara ' + data.suara;
+    kotakTautan.hidden = true;
+    tautan.textContent = '';
+    tombolBagi.disabled = false;
+    tombolBagi.textContent = 'Bagikan ke getshared';
+    bagianHasil.classList.add('tampil');
+  }
+
+  tombolBagi.addEventListener('click', async () => {
+    if (!hasilTerakhir || !BAGIKAN_AKTIF) return;
+    tampilkanGalat('');
+    tombolBagi.disabled = true;
+    tombolBagi.textContent = 'Mengunggah...';
+    try {
+      const res = await fetch('/api/bagikan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama: hasilTerakhir.nama }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        tampilkanGalat(data.pesan || 'Gagal mengunggah.');
+        return;
+      }
+      tautan.href = data.link;
+      tautan.textContent = data.link;
+      kotakTautan.hidden = false;
+    } catch (err) {
+      tampilkanGalat('Tidak bisa menghubungi server: ' + err.message);
+    } finally {
+      tombolBagi.disabled = false;
+      tombolBagi.textContent = 'Bagikan ke getshared';
+    }
+  });
+
+  document.getElementById('tombol-salin').addEventListener('click', async () => {
+    if (!tautan.textContent) return;
+    try {
+      await navigator.clipboard.writeText(tautan.textContent);
+      const tombol = document.getElementById('tombol-salin');
+      tombol.textContent = 'Tersalin';
+      setTimeout(() => (tombol.textContent = 'Salin link'), 1500);
+    } catch (err) {
+      tampilkanGalat('Gagal menyalin. Pilih linknya secara manual.');
+    }
+  });
+
+  document.getElementById('file-txt').addEventListener('change', async (e) => {
+    const berkas = e.target.files[0];
+    if (!berkas) return;
+    try {
+      const isi = await berkas.text();
+      if (!isi.trim()) {
+        tampilkanGalat('File teks kosong.');
+        return;
+      }
+      document.getElementById('teks').value = isi.trim();
+      tampilkanGalat('');
+    } catch (err) {
+      tampilkanGalat('Gagal membaca file teks.');
+    }
+    e.target.value = '';
+  });
+</script>
+</body>
+</html>
